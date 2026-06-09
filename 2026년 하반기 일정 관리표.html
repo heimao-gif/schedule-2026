@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///C:/Users/7945/Downloads/schedule_2026_h2.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026년 하반기 일정 관리표</title>
+<style>
+/* ============================================================
+   기본 리셋 & 변수
+   ============================================================ */
+:root {
+  --bg: #ffffff;
+  --surface: #f8f9fb;
+  --border: #e3e6ec;
+  --border-strong: #c9cdd6;
+  --text: #1f2430;
+  --text-muted: #6b7280;
+  --primary: #1f3a8a;
+  --primary-hover: #15296b;
+  --accent: #3b82f6;
+  --sat: #2563eb;
+  --sun: #dc2626;
+  --holiday-bg: #fff1f2;
+  --holiday-text: #b91c1c;
+  --today-bg: #fef9c3;
+  --today-border: #ca8a04;
+
+  /* 일정 유형별 색상 */
+  --type-personal: #6366f1;
+  --type-meeting:  #0ea5e9;
+  --type-class:    #14b8a6;
+  --type-research: #8b5cf6;
+  --type-event:    #f59e0b;
+  --type-deadline: #ef4444;
+  --type-etc:      #6b7280;
+
+  /* 중요도 */
+  --imp-low:    #94a3b8;
+  --imp-normal: #2563eb;
+  --imp-high:   #dc2626;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo",
+               "Noto Sans KR", "Malgun Gothic", sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   레이아웃
+   ============================================================ */
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+header.topbar h1 {
+  font-size: 22px;
+  margin: 0;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+header.topbar .subtitle {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.toolbar .group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.toolbar .spacer { flex: 1; min-width: 12px; }
+
+button, .btn {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+button:hover, .btn:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+}
+button.primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+button.primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+button.danger {
+  background: white;
+  color: var(--sun);
+  border-color: #fecaca;
+}
+button.danger:hover {
+  background: #fef2f2;
+  border-color: var(--sun);
+}
+
+input[type="text"], input[type="search"], input[type="time"],
+input[type="date"], select, textarea {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(31, 58, 138, 0.1);
+}
+
+/* ============================================================
+   월 네비게이션
+   ============================================================ */
+.month-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.month-nav button {
+  font-weight: 500;
+}
+.month-nav button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ============================================================
+   필터 & 검색 영역
+   ============================================================ */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.filter-bar label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+.filter-bar select, .filter-bar input {
+  width: auto;
+  min-width: 140px;
+}
+.filter-bar .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+/* ============================================================
+   메인 그리드: 달력 + 사이드 패널
+   ============================================================ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 16px;
+}
+@media (max-width: 1024px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   달력
+   ============================================================ */
+.calendar {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.calendar-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--primary);
+}
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.weekdays div {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border);
+}
+.weekdays div:last-child { border-right: none; }
+.weekdays div.sat { color: var(--sat); }
+.weekdays div.sun { color: var(--sun); }
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(110px, auto);
+}
+.day {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  background: var(--bg);
+  transition: background 0.1s;
+  overflow: hidden;
+}
+.day:nth-child(7n) { border-right: none; }
+.day:hover { background: #f9fafb; }
+.day.other-month {
+  background: #f9fafb;
+  color: #cbd5e1;
+  cursor: default;
+}
+.day.other-month:hover { background: #f9fafb; }
+.day.today {
+  background: var(--today-bg);
+  box-shadow: inset 0 0 0 2px var(--today-border);
+}
+.day.holiday {
+  background: var(--holiday-bg);
+}
+.day.weekend-sat .date-num { color: var(--sat); }
+.day.weekend-sun .date-num { color: var(--sun); }
+.day.holiday .date-num { color: var(--holiday-text); font-weight: 700; }
+
+.date-num {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.holiday-name {
+  font-size: 10px;
+  color: var(--holiday-text);
+  background: rgba(220, 38, 38, 0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-pill {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  color: white;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  border-left: 3px solid rgba(0,0,0,0.25);
+}
+.event-pill.imp-high { box-shadow: inset 0 0 0 2px rgba(220,38,38,0.6); }
+.event-pill .time {
+  font-size: 10px;
+  opacity: 0.85;
+  margin-right: 3px;
+}
+.event-more {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 1px 4px;
+  cursor: pointer;
+}
+
+/* 일정 유형별 색상 */
+.type-personal { background: var(--type-personal); }
+.type-meeting  { background: var(--type-meeting); }
+.type-class    { background: var(--type-class); }
+.type-research { background: var(--type-research); }
+.type-event    { background: var(--type-event); }
+.type-deadline { background: var(--type-deadline); }
+.type-etc      { background: var(--type-etc); }
+
+/* ============================================================
+   사이드 패널
+   ============================================================ */
+.side-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  height: fit-content;
+  position: sticky;
+  top: 12px;
+}
+.side-panel h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--primary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.side-panel .empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.event-card {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--type-etc);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.event-card:hover { background: var(--surface); }
+.event-card .title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+.event-card .meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.event-card .badges {
+  margin-top: 6px;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.badge.type-personal,
+.badge.type-meeting,
+.badge.type-class,
+.badge.type-research,
+.badge.type-event,
+.badge.type-deadline,
+.badge.type-etc { color: white; border: none; }
+
+.badge.imp-low    { background: var(--imp-low); color: white; border: none; }
+.badge.imp-normal { background: var(--imp-normal); color: white; border: none; }
+.badge.imp-high   { background: var(--imp-high); color: white; border: none; }
+
+/* ============================================================
+   범례
+   ============================================================ */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* ============================================================
+   모달
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: none;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-backdrop.active { display: flex; }
+.modal {
+  background: var(--bg);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+.modal-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--primary);
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+  width: 28px;
+  height: 28px;
+}
+.modal-body {
+  padding: 18px;
+}
+.form-row {
+  margin-bottom: 12px;
+}
+.form-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.modal-footer {
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.modal-footer .right {
+  display: flex;
+  gap: 8px;
+}
+
+/* 토스트 알림 */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* 공유 모달의 텍스트영역 */
+textarea.share-link {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ============================================================
+   인쇄 스타일
+   ============================================================ */
+@media print {
+  body { background: white; font-size: 11px; }
+  .app { padding: 0; max-width: none; }
+  .toolbar, .month-nav, .filter-bar, .side-panel, .modal-backdrop {
+    display: none !important;
+  }
+  .main-grid { grid-template-columns: 1fr; }
+  .calendar { border: 1px solid #999; page-break-inside: avoid; }
+  .days { grid-auto-rows: minmax(80px, auto); }
+  .day { border-color: #ccc !important; }
+  .event-pill { color: black !important; background: white !important;
+                border-left: 3px solid currentColor !important; }
+  header.topbar h1 { font-size: 18px; }
+}
+
+/* 모바일 미세 조정 */
+@media (max-width: 640px) {
+  .app { padding: 12px; }
+  header.topbar h1 { font-size: 18px; }
+  .days { grid-auto-rows: minmax(80px, auto); }
+  .day { padding: 4px; }
+  .date-num { font-size: 11px; }
+  .event-pill { font-size: 10px; padding: 1px 4px; }
+  .holiday-name { font-size: 9px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- 상단 제목 -->
+  <header class="topbar">
+    <div>
+      <h1>2026년 하반기 일정 관리표</h1>
+      <div class="subtitle">2026년 6월 1일 ~ 12월 31일 · 대한민국 공휴일 반영</div>
+    </div>
+    <div class="subtitle" id="todayLabel">오늘: 2026.06.09 (화)</div>
+  </header>
+
+  <!-- 도구 모음 -->
+  <div class="toolbar">
+    <div class="group">
+      <button class="primary" onclick="openEventModal()">＋ 일정 추가</button>
+      <button onclick="openSearchModal()">🔍 검색</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="group">
+      <button onclick="exportJSON()">JSON 내보내기</button>
+      <button onclick="importJSON()">JSON 불러오기</button>
+      <button onclick="exportCSV()">CSV 내보내기</button>
+      <button onclick="exportICS()">.ics 내보내기</button>
+      <button onclick="openShareModal()">🔗 공유 링크</button>
+      <button onclick="window.print()">🖨 인쇄</button>
+    </div>
+  </div>
+
+  <!-- 월 네비게이션 -->
+  <nav class="month-nav" id="monthNav"><button class="active">2026년 6월</button><button class="">2026년 7월</button><button class="">2026년 8월</button><button>2026년 9월</button><button>2026년 10월</button><button>2026년 11월</button><button>2026년 12월</button></nav>
+
+  <!-- 필터 영역 -->
+  <div class="filter-bar">
+    <label>유형</label>
+    <select id="filterType" onchange="renderCalendar()">
+      <option value="all">전체</option>
+      <option value="personal">개인 일정</option>
+      <option value="meeting">회의</option>
+      <option value="class">수업</option>
+      <option value="research">연구</option>
+      <option value="event">행사</option>
+      <option value="deadline">마감</option>
+      <option value="etc">기타</option>
+    </select>
+    <label class="checkbox-label">
+      <input type="checkbox" id="filterImportant" onchange="renderCalendar()">
+      중요 일정만 보기
+    </label>
+    <div class="spacer" style="flex:1;"></div>
+    <span class="subtitle" id="eventCount">총 35건</span>
+  </div>
+
+  <!-- 범례 -->
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--holiday-bg);border:1px solid var(--holiday-text)"></span>공휴일</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--today-bg);border:1px solid var(--today-border)"></span>오늘</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-personal)"></span>개인</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-meeting)"></span>회의</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-class)"></span>수업</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-research)"></span>연구</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-event)"></span>행사</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-deadline)"></span>마감</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:var(--type-etc)"></span>기타</span>
+  </div>
+
+  <!-- 메인 영역 -->
+  <div class="main-grid">
+    <!-- 달력 -->
+    <section class="calendar">
+      <div class="calendar-header">
+        <h2 id="monthLabel">2026년 6월</h2>
+        <div>
+          <button onclick="prevMonth()">◀ 이전</button>
+          <button onclick="nextMonth()">다음 ▶</button>
+        </div>
+      </div>
+      <div class="weekdays">
+        <div>월</div><div>화</div><div>수</div><div>목</div><div>금</div>
+        <div class="sat">토</div><div class="sun">일</div>
+      </div>
+      <div class="days" id="daysGrid"><div class="day" data-date="2026-06-01"><div class="date-num">1</div></div><div class="day" data-date="2026-06-02"><div class="date-num">2</div></div><div class="day holiday" data-date="2026-06-03"><div class="date-num">3</div><div class="holiday-name" title="제9회 전국동시지방선거일">제9회 전국동시지방선거일</div></div><div class="day" data-date="2026-06-04"><div class="date-num">4</div></div><div class="day" data-date="2026-06-05"><div class="date-num">5</div></div><div class="day holiday weekend-sat" data-date="2026-06-06"><div class="date-num">6</div><div class="holiday-name" title="현충일">현충일</div></div><div class="day weekend-sun" data-date="2026-06-07"><div class="date-num">7</div></div><div class="day" data-date="2026-06-08"><div class="date-num">8</div></div><div class="day today" data-date="2026-06-09" style="outline: 2px solid var(--primary);"><div class="date-num">9</div></div><div class="day" data-date="2026-06-10"><div class="date-num">10</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5t934o8fl8t&#39;)" title="코사바이오 A1"><span class="time">08:30</span>코사바이오 A1</span></div><div class="day" data-date="2026-06-11"><div class="date-num">11</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5ta6rrj16ie&#39;)" title="코사바이오 A1"><span class="time">08:30</span>코사바이오 A1</span><span class="event-pill type-deadline" onclick="event.stopPropagation();openEventModal(&#39;emq5u34sw9fryv&#39;)" title="대학원 논문 심사 종료"><span class="time">13:00</span>대학원 논문 심사 종료</span></div><div class="day" data-date="2026-06-12"><div class="date-num">12</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tavunphf95&#39;)" title="코사바이오 A1"><span class="time">09:00</span>코사바이오 A1</span><span class="event-pill type-meeting" onclick="event.stopPropagation();openEventModal(&#39;emq5wg7ikein3u&#39;)" title="송정동 미팅"><span class="time">14:00</span>송정동 미팅</span></div><div class="day weekend-sat" data-date="2026-06-13"><div class="date-num">13</div></div><div class="day weekend-sun" data-date="2026-06-14"><div class="date-num">14</div></div><div class="day" data-date="2026-06-15"><div class="date-num">15</div><span class="event-pill type-meeting" onclick="event.stopPropagation();openEventModal(&#39;emq5z7j7szeptl&#39;)" title="성수1가2동 미팅"><span class="time">14:00</span>성수1가2동 미팅</span></div><div class="day" data-date="2026-06-16" style=""><div class="date-num">16</div></div><div class="day" data-date="2026-06-17"><div class="date-num">17</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tbozrcburf&#39;)" title="코사바이오 A2"><span class="time">08:30</span>코사바이오 A2</span></div><div class="day" data-date="2026-06-18"><div class="date-num">18</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tcfv76ixfw&#39;)" title="코사바이오 A2"><span class="time">08:30</span>코사바이오 A2</span></div><div class="day" data-date="2026-06-19"><div class="date-num">19</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5td2an3615m&#39;)" title="코사바이오 A2"><span class="time">08:30</span>코사바이오 A2</span></div><div class="day weekend-sat" data-date="2026-06-20"><div class="date-num">20</div></div><div class="day weekend-sun" data-date="2026-06-21"><div class="date-num">21</div></div><div class="day" data-date="2026-06-22"><div class="date-num">22</div></div><div class="day" data-date="2026-06-23"><div class="date-num">23</div></div><div class="day" data-date="2026-06-24"><div class="date-num">24</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tf5angfrvs&#39;)" title="코사바이오 B1"><span class="time">08:30</span>코사바이오 B1</span></div><div class="day" data-date="2026-06-25"><div class="date-num">25</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tfsm7qt2jb&#39;)" title="코사바이오 B1"><span class="time">08:30</span>코사바이오 B1</span></div><div class="day" data-date="2026-06-26"><div class="date-num">26</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5tghuv08ds0&#39;)" title="코사바이오 B1"><span class="time">08:30</span>코사바이오 B1</span></div><div class="day weekend-sat" data-date="2026-06-27"><div class="date-num">27</div></div><div class="day weekend-sun" data-date="2026-06-28"><div class="date-num">28</div></div><div class="day" data-date="2026-06-29"><div class="date-num">29</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5thqr3hmkhq&#39;)" title="정지혜 사근동 사후검사"><span class="time">09:00</span>정지혜 사근동 사후검사</span></div><div class="day" data-date="2026-06-30"><div class="date-num">30</div><span class="event-pill type-research" onclick="event.stopPropagation();openEventModal(&#39;emq5timnz68t4o&#39;)" title="정지혜 성수1가2동 사전검사"><span class="time">09:00</span>정지혜 성수1가2동 사전검사</span></div><div class="day other-month"><div class="date-num">1</div></div><div class="day other-month"><div class="date-num">2</div></div><div class="day other-month"><div class="date-num">3</div></div><div class="day other-month"><div class="date-num">4</div></div><div class="day other-month"><div class="date-num">5</div></div></div>
+    </section>
+
+    <!-- 사이드 패널: 선택일 일정 -->
+    <aside class="side-panel">
+      <h3 id="sidePanelTitle">2026.06.09 (화)</h3>
+      <div id="sidePanelBody"><div class="empty">등록된 일정이 없습니다.<br><button class="primary" style="margin-top:10px" onclick="openEventModal(null,&#39;2026-06-09&#39;)">＋ 이 날짜에 일정 추가</button></div></div>
+    </aside>
+  </div>
+</div>
+
+<!-- ============================================================
+     일정 추가/수정 모달
+     ============================================================ -->
+<div class="modal-backdrop" id="eventModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="eventModalTitle">일정 추가</h3>
+      <button class="modal-close" onclick="closeEventModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="eventId" value="">
+      <div class="form-row">
+        <label>일정 제목 *</label>
+        <input type="text" id="eventTitle" placeholder="예: 연구실 회의">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>날짜 *</label>
+          <input type="date" id="eventDate" min="2026-06-01" max="2026-12-31">
+        </div>
+        <div class="form-row">
+          <label>일정 유형</label>
+          <select id="eventType">
+            <option value="personal">개인 일정</option>
+            <option value="meeting">회의</option>
+            <option value="class">수업</option>
+            <option value="research">연구</option>
+            <option value="event">행사</option>
+            <option value="deadline">마감</option>
+            <option value="etc">기타</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>시작 시간</label>
+          <input type="time" id="eventStart">
+        </div>
+        <div class="form-row">
+          <label>종료 시간</label>
+          <input type="time" id="eventEnd">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>장소</label>
+          <input type="text" id="eventLocation" placeholder="예: 한양대 체육관">
+        </div>
+        <div class="form-row">
+          <label>담당자</label>
+          <input type="text" id="eventOwner" placeholder="예: 이해성">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>중요도</label>
+        <select id="eventImportance">
+          <option value="low">낮음</option>
+          <option value="normal" selected="">보통</option>
+          <option value="high">높음</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>메모</label>
+        <textarea id="eventMemo" rows="3" placeholder="추가 메모를 입력하세요"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="danger" id="deleteBtn" onclick="deleteEvent()" style="display: none;">삭제</button>
+      <div class="right">
+        <button onclick="closeEventModal()">취소</button>
+        <button class="primary" onclick="saveEvent()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 검색 모달 -->
+<div class="modal-backdrop" id="searchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>일정 검색</h3>
+      <button class="modal-close" onclick="closeSearchModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <input type="search" id="searchInput" placeholder="제목, 장소, 담당자, 메모에서 검색" oninput="runSearch()">
+      </div>
+      <div id="searchResults" style="max-height:50vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 공유 모달 -->
+<div class="modal-backdrop" id="shareModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>공유 링크</h3>
+      <button class="modal-close" onclick="closeShareModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>공유용 링크</label>
+        <textarea id="shareLink" class="share-link" readonly=""></textarea>
+      </div>
+      <div id="shareWarn" style="font-size:12px;color:var(--text-muted);margin-top:6px;"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="right" style="margin-left:auto;">
+        <button onclick="closeShareModal()">닫기</button>
+        <button class="primary" onclick="copyShareLink()">링크 복사</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">일정이 추가되었습니다</div>
+
+<!-- 숨겨진 파일 입력 (JSON 불러오기용) -->
+<input type="file" id="fileInput" accept=".json,application/json" style="display:none">
+
+<script>
+/* ============================================================
+   1. 데이터 & 상수
+   ============================================================ */
+
+// 대한민국 공휴일 (2026년 하반기)
+const HOLIDAYS = {
+  "2026-06-03": "제9회 전국동시지방선거일",
+  "2026-06-06": "현충일",
+  "2026-07-17": "제헌절",
+  "2026-08-15": "광복절",
+  "2026-08-17": "광복절 대체공휴일",
+  "2026-09-24": "추석 연휴",
+  "2026-09-25": "추석",
+  "2026-09-26": "추석 연휴",
+  "2026-10-03": "개천절",
+  "2026-10-05": "개천절 대체공휴일",
+  "2026-10-09": "한글날",
+  "2026-12-25": "기독탄신일"
+};
+
+const TYPE_LABEL = {
+  personal: "개인 일정",
+  meeting:  "회의",
+  class:    "수업",
+  research: "연구",
+  event:    "행사",
+  deadline: "마감",
+  etc:      "기타"
+};
+
+const IMPORTANCE_LABEL = { low: "낮음", normal: "보통", high: "높음" };
+
+// 표시 가능한 월: 2026년 6월 ~ 12월
+const MONTHS = [
+  { y: 2026, m: 6 },  { y: 2026, m: 7 },  { y: 2026, m: 8 },
+  { y: 2026, m: 9 },  { y: 2026, m: 10 }, { y: 2026, m: 11 }, { y: 2026, m: 12 }
+];
+
+// 상태
+let state = {
+  currentIndex: 0,   // MONTHS 배열 인덱스
+  events: [],        // 전체 일정
+  selectedDate: null
+};
+
+const STORAGE_KEY = "schedule_2026_h2_v1";
+
+/* ============================================================
+   2. 유틸 함수
+   ============================================================ */
+function uid() {
+  return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+function ymd(y, m, d) { return `${y}-${pad(m)}-${pad(d)}`; }
+function parseYMD(s) {
+  const [y, m, d] = s.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function todayYMD() {
+  const t = new Date();
+  return ymd(t.getFullYear(), t.getMonth() + 1, t.getDate());
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   3. 저장소 (localStorage)
+   ============================================================ */
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.events));
+  } catch (e) {
+    showToast("저장 실패: " + e.message);
+  }
+}
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state.events = JSON.parse(raw);
+  } catch (e) {
+    console.error("불러오기 실패", e);
+    state.events = [];
+  }
+}
+
+/* ============================================================
+   4. 월 네비게이션
+   ============================================================ */
+function buildMonthNav() {
+  const nav = document.getElementById('monthNav');
+  nav.innerHTML = '';
+  MONTHS.forEach((mo, idx) => {
+    const b = document.createElement('button');
+    b.textContent = `${mo.y}년 ${mo.m}월`;
+    if (idx === state.currentIndex) b.classList.add('active');
+    b.onclick = () => { state.currentIndex = idx; renderCalendar(); };
+    nav.appendChild(b);
+  });
+}
+function prevMonth() {
+  if (state.currentIndex > 0) { state.currentIndex--; renderCalendar(); }
+}
+function nextMonth() {
+  if (state.currentIndex < MONTHS.length - 1) { state.currentIndex++; renderCalendar(); }
+}
+
+/* ============================================================
+   5. 달력 렌더링
+   ============================================================ */
+function getFilteredEvents() {
+  const type = document.getElementById('filterType').value;
+  const onlyImp = document.getElementById('filterImportant').checked;
+  return state.events.filter(e => {
+    if (type !== "all" && e.type !== type) return false;
+    if (onlyImp && e.importance !== "high") return false;
+    return true;
+  });
+}
+
+function renderCalendar() {
+  const mo = MONTHS[state.currentIndex];
+  const monthLabel = document.getElementById('monthLabel');
+  monthLabel.textContent = `${mo.y}년 ${mo.m}월`;
+
+  // 월별 네비 active 갱신
+  document.querySelectorAll('#monthNav button').forEach((b, i) => {
+    b.classList.toggle('active', i === state.currentIndex);
+  });
+
+  const grid = document.getElementById('daysGrid');
+  grid.innerHTML = '';
+
+  const first = new Date(mo.y, mo.m - 1, 1);
+  const last  = new Date(mo.y, mo.m, 0); // 해당 월의 마지막 날
+  // 월요일을 0으로 (JS getDay: 일=0..토=6 → 월=0..일=6 변환)
+  let leadDays = (first.getDay() + 6) % 7;
+  const daysInMonth = last.getDate();
+
+  // 직전 달의 채우기 칸
+  const prevMonthLast = new Date(mo.y, mo.m - 1, 0).getDate();
+  for (let i = leadDays; i > 0; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'day other-month';
+    cell.innerHTML = `<div class="date-num">${prevMonthLast - i + 1}</div>`;
+    grid.appendChild(cell);
+  }
+
+  const filtered = getFilteredEvents();
+  const today = todayYMD();
+
+  // 현재 월 날짜
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = ymd(mo.y, mo.m, d);
+    const dt = new Date(mo.y, mo.m - 1, d);
+    const dow = dt.getDay(); // 0=일, 6=토
+    const cell = document.createElement('div');
+    cell.className = 'day';
+    cell.dataset.date = dateStr;
+
+    if (dateStr === today) cell.classList.add('today');
+    if (HOLIDAYS[dateStr]) cell.classList.add('holiday');
+    if (dow === 0) cell.classList.add('weekend-sun');
+    if (dow === 6) cell.classList.add('weekend-sat');
+
+    let html = `<div class="date-num">${d}</div>`;
+    if (HOLIDAYS[dateStr]) {
+      html += `<div class="holiday-name" title="${HOLIDAYS[dateStr]}">${HOLIDAYS[dateStr]}</div>`;
+    }
+
+    // 해당 날짜의 일정
+    const dayEvents = filtered
+      .filter(e => e.date === dateStr)
+      .sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+
+    const maxShow = 3;
+    dayEvents.slice(0, maxShow).forEach(e => {
+      const impCls = e.importance === 'high' ? ' imp-high' : '';
+      const timeHtml = e.start ? `<span class="time">${e.start}</span>` : '';
+      html += `<span class="event-pill type-${e.type}${impCls}"
+                  onclick="event.stopPropagation();openEventModal('${e.id}')"
+                  title="${escapeHtml(e.title)}">${timeHtml}${escapeHtml(e.title)}</span>`;
+    });
+    if (dayEvents.length > maxShow) {
+      html += `<div class="event-more">+${dayEvents.length - maxShow} 더보기</div>`;
+    }
+
+    cell.innerHTML = html;
+    cell.onclick = () => selectDate(dateStr);
+    grid.appendChild(cell);
+  }
+
+  // 다음 달 채우기
+  const totalCells = leadDays + daysInMonth;
+  const trail = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= trail; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day other-month';
+    cell.innerHTML = `<div class="date-num">${i}</div>`;
+    grid.appendChild(cell);
+  }
+
+  // 카운트 표시
+  const total = state.events.length;
+  const shown = filtered.length;
+  document.getElementById('eventCount').textContent =
+    total === shown ? `총 ${total}건` : `총 ${total}건 (필터: ${shown}건)`;
+
+  // 사이드 패널 갱신
+  if (state.selectedDate) renderSidePanel(state.selectedDate);
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/* ============================================================
+   6. 사이드 패널: 선택 날짜의 일정
+   ============================================================ */
+function selectDate(dateStr) {
+  state.selectedDate = dateStr;
+  // 시각적 표시
+  document.querySelectorAll('.day').forEach(el => el.style.outline = '');
+  const el = document.querySelector(`.day[data-date="${dateStr}"]`);
+  if (el) el.style.outline = '2px solid var(--primary)';
+  renderSidePanel(dateStr);
+}
+
+function renderSidePanel(dateStr) {
+  const title = document.getElementById('sidePanelTitle');
+  const body = document.getElementById('sidePanelBody');
+  const dt = parseYMD(dateStr);
+  const dowName = ['일', '월', '화', '수', '목', '금', '토'][dt.getDay()];
+  const holidayName = HOLIDAYS[dateStr];
+  title.innerHTML = `${dt.getFullYear()}.${pad(dt.getMonth()+1)}.${pad(dt.getDate())} (${dowName})`
+                  + (holidayName ? ` <span class="badge" style="background:var(--holiday-bg);color:var(--holiday-text);border:1px solid var(--holiday-text)">${holidayName}</span>` : '');
+
+  const events = state.events
+    .filter(e => e.date === dateStr)
+    .sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+
+  if (events.length === 0) {
+    body.innerHTML = `<div class="empty">등록된 일정이 없습니다.<br><button class="primary" style="margin-top:10px" onclick="openEventModal(null,'${dateStr}')">＋ 이 날짜에 일정 추가</button></div>`;
+    return;
+  }
+
+  let html = `<button class="primary" style="margin-bottom:10px;width:100%" onclick="openEventModal(null,'${dateStr}')">＋ 이 날짜에 일정 추가</button>`;
+  events.forEach(e => {
+    const timeStr = e.start
+      ? (e.end ? `${e.start} ~ ${e.end}` : e.start)
+      : '시간 미정';
+    html += `
+      <div class="event-card" style="border-left-color: var(--type-${e.type})" onclick="openEventModal('${e.id}')">
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="meta">
+          <span>🕐 ${timeStr}</span>
+          ${e.location ? `<span>📍 ${escapeHtml(e.location)}</span>` : ''}
+          ${e.owner ? `<span>👤 ${escapeHtml(e.owner)}</span>` : ''}
+        </div>
+        <div class="badges">
+          <span class="badge type-${e.type}">${TYPE_LABEL[e.type]}</span>
+          <span class="badge imp-${e.importance}">${IMPORTANCE_LABEL[e.importance]}</span>
+        </div>
+        ${e.memo ? `<div style="font-size:12px;color:var(--text-muted);margin-top:6px;white-space:pre-wrap">${escapeHtml(e.memo)}</div>` : ''}
+      </div>`;
+  });
+  body.innerHTML = html;
+}
+
+/* ============================================================
+   7. 일정 추가/수정/삭제 모달
+   ============================================================ */
+function openEventModal(eventId, defaultDate) {
+  const modal = document.getElementById('eventModal');
+  const title = document.getElementById('eventModalTitle');
+  const deleteBtn = document.getElementById('deleteBtn');
+
+  if (eventId) {
+    // 수정 모드
+    const ev = state.events.find(e => e.id === eventId);
+    if (!ev) return;
+    title.textContent = '일정 수정';
+    document.getElementById('eventId').value = ev.id;
+    document.getElementById('eventTitle').value = ev.title || '';
+    document.getElementById('eventDate').value = ev.date || '';
+    document.getElementById('eventStart').value = ev.start || '';
+    document.getElementById('eventEnd').value = ev.end || '';
+    document.getElementById('eventLocation').value = ev.location || '';
+    document.getElementById('eventOwner').value = ev.owner || '';
+    document.getElementById('eventType').value = ev.type || 'personal';
+    document.getElementById('eventImportance').value = ev.importance || 'normal';
+    document.getElementById('eventMemo').value = ev.memo || '';
+    deleteBtn.style.display = '';
+  } else {
+    // 추가 모드
+    title.textContent = '일정 추가';
+    document.getElementById('eventId').value = '';
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventDate').value = defaultDate || state.selectedDate || todayYMD();
+    document.getElementById('eventStart').value = '';
+    document.getElementById('eventEnd').value = '';
+    document.getElementById('eventLocation').value = '';
+    document.getElementById('eventOwner').value = '';
+    document.getElementById('eventType').value = 'personal';
+    document.getElementById('eventImportance').value = 'normal';
+    document.getElementById('eventMemo').value = '';
+    deleteBtn.style.display = 'none';
+  }
+  modal.classList.add('active');
+  setTimeout(() => document.getElementById('eventTitle').focus(), 50);
+}
+function closeEventModal() {
+  document.getElementById('eventModal').classList.remove('active');
+}
+function saveEvent() {
+  const id = document.getElementById('eventId').value;
+  const title = document.getElementById('eventTitle').value.trim();
+  const date  = document.getElementById('eventDate').value;
+  if (!title) { showToast("일정 제목을 입력하세요"); return; }
+  if (!date) { showToast("날짜를 선택하세요"); return; }
+  if (date < "2026-06-01" || date > "2026-12-31") {
+    showToast("2026년 6월~12월 범위 내 날짜만 입력 가능합니다");
+    return;
+  }
+
+  const evData = {
+    id: id || uid(),
+    title,
+    date,
+    start: document.getElementById('eventStart').value,
+    end: document.getElementById('eventEnd').value,
+    location: document.getElementById('eventLocation').value.trim(),
+    owner: document.getElementById('eventOwner').value.trim(),
+    type: document.getElementById('eventType').value,
+    importance: document.getElementById('eventImportance').value,
+    memo: document.getElementById('eventMemo').value
+  };
+
+  if (id) {
+    const idx = state.events.findIndex(e => e.id === id);
+    if (idx >= 0) state.events[idx] = evData;
+  } else {
+    state.events.push(evData);
+  }
+  saveToStorage();
+  closeEventModal();
+  renderCalendar();
+  showToast(id ? "일정이 수정되었습니다" : "일정이 추가되었습니다");
+}
+function deleteEvent() {
+  const id = document.getElementById('eventId').value;
+  if (!id) return;
+  if (!confirm("이 일정을 삭제하시겠습니까?")) return;
+  state.events = state.events.filter(e => e.id !== id);
+  saveToStorage();
+  closeEventModal();
+  renderCalendar();
+  showToast("일정이 삭제되었습니다");
+}
+
+/* ============================================================
+   8. 검색
+   ============================================================ */
+function openSearchModal() {
+  document.getElementById('searchModal').classList.add('active');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML =
+    '<div class="empty" style="text-align:center;color:var(--text-muted);padding:20px;">검색어를 입력하세요</div>';
+  setTimeout(() => document.getElementById('searchInput').focus(), 50);
+}
+function closeSearchModal() {
+  document.getElementById('searchModal').classList.remove('active');
+}
+function runSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const box = document.getElementById('searchResults');
+  if (!q) {
+    box.innerHTML = '<div class="empty" style="text-align:center;color:var(--text-muted);padding:20px;">검색어를 입력하세요</div>';
+    return;
+  }
+  const results = state.events.filter(e => {
+    return (e.title && e.title.toLowerCase().includes(q))
+        || (e.location && e.location.toLowerCase().includes(q))
+        || (e.owner && e.owner.toLowerCase().includes(q))
+        || (e.memo && e.memo.toLowerCase().includes(q));
+  }).sort((a, b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''));
+
+  if (results.length === 0) {
+    box.innerHTML = '<div class="empty" style="text-align:center;color:var(--text-muted);padding:20px;">일치하는 일정이 없습니다</div>';
+    return;
+  }
+
+  let html = `<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">검색 결과 ${results.length}건</div>`;
+  results.forEach(e => {
+    html += `
+      <div class="event-card" style="border-left-color:var(--type-${e.type})"
+           onclick="closeSearchModal();jumpToEvent('${e.id}')">
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="meta">
+          <span>📅 ${e.date}</span>
+          ${e.start ? `<span>🕐 ${e.start}${e.end ? ' ~ ' + e.end : ''}</span>` : ''}
+          ${e.location ? `<span>📍 ${escapeHtml(e.location)}</span>` : ''}
+        </div>
+        <div class="badges">
+          <span class="badge type-${e.type}">${TYPE_LABEL[e.type]}</span>
+          <span class="badge imp-${e.importance}">${IMPORTANCE_LABEL[e.importance]}</span>
+        </div>
+      </div>`;
+  });
+  box.innerHTML = html;
+}
+function jumpToEvent(eventId) {
+  const ev = state.events.find(e => e.id === eventId);
+  if (!ev) return;
+  // 해당 월로 이동
+  const [y, m] = ev.date.split('-').map(Number);
+  const idx = MONTHS.findIndex(mo => mo.y === y && mo.m === m);
+  if (idx >= 0) state.currentIndex = idx;
+  state.selectedDate = ev.date;
+  renderCalendar();
+  setTimeout(() => openEventModal(eventId), 200);
+}
+
+/* ============================================================
+   9. 내보내기 / 불러오기
+   ============================================================ */
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportJSON() {
+  const payload = {
+    meta: {
+      app: "2026 H2 Schedule",
+      exportedAt: new Date().toISOString(),
+      count: state.events.length
+    },
+    events: state.events
+  };
+  downloadFile(JSON.stringify(payload, null, 2),
+               `schedule_${todayYMD()}.json`,
+               'application/json');
+  showToast("JSON 파일을 내보냈습니다");
+}
+
+function importJSON() {
+  const input = document.getElementById('fileInput');
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        const events = data.events || data; // 두 가지 형태 모두 허용
+        if (!Array.isArray(events)) throw new Error("올바른 형식이 아닙니다");
+        const mode = confirm(
+          `${events.length}건의 일정을 불러옵니다.\n\n` +
+          `[확인] 기존 일정을 모두 대체합니다\n[취소] 기존에 일정을 추가합니다 (병합)`
+        );
+        if (mode) {
+          state.events = events;
+        } else {
+          // 병합: 동일 id면 덮어쓰기
+          const map = new Map(state.events.map(e => [e.id, e]));
+          events.forEach(e => map.set(e.id || uid(), e));
+          state.events = Array.from(map.values());
+        }
+        saveToStorage();
+        renderCalendar();
+        showToast(`${events.length}건을 불러왔습니다`);
+      } catch (err) {
+        showToast("불러오기 실패: " + err.message);
+      }
+      input.value = ''; // reset
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function exportCSV() {
+  const header = ["날짜", "시작", "종료", "제목", "유형", "장소", "담당자", "중요도", "메모"];
+  const rows = state.events
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.start || '').localeCompare(b.start || ''))
+    .map(e => [
+      e.date, e.start || '', e.end || '', e.title,
+      TYPE_LABEL[e.type] || e.type,
+      e.location || '', e.owner || '',
+      IMPORTANCE_LABEL[e.importance] || e.importance,
+      (e.memo || '').replace(/\r?\n/g, ' ')
+    ]);
+  const escape = (v) => {
+    const s = String(v == null ? '' : v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  // Excel에서 한글이 깨지지 않도록 BOM 포함
+  const csv = "\uFEFF" + [header, ...rows].map(r => r.map(escape).join(',')).join('\r\n');
+  downloadFile(csv, `schedule_${todayYMD()}.csv`, 'text/csv;charset=utf-8;');
+  showToast("CSV 파일을 내보냈습니다");
+}
+
+function exportICS() {
+  // RFC 5545 형식의 iCalendar
+  const fold = (line) => {
+    // 75 octet 줄 접기 (한글은 멀티바이트라 보수적으로 60자 기준)
+    if (line.length <= 75) return line;
+    let out = '', i = 0;
+    while (i < line.length) {
+      out += (i === 0 ? '' : '\r\n ') + line.slice(i, i + 70);
+      i += 70;
+    }
+    return out;
+  };
+  const escapeICS = (s) =>
+    String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;')
+                   .replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Schedule 2026 H2//KO",
+    "CALSCALE:GREGORIAN",
+    "X-WR-CALNAME:2026년 하반기 일정 관리표",
+    "X-WR-TIMEZONE:Asia/Seoul"
+  ];
+
+  const now = new Date();
+  const dtstamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+
+  state.events.forEach(e => {
+    const [y, m, d] = e.date.split('-');
+    let dtstart, dtend;
+    if (e.start) {
+      const [sh, sm] = e.start.split(':');
+      dtstart = `${y}${m}${d}T${sh}${sm}00`;
+      if (e.end) {
+        const [eh, em] = e.end.split(':');
+        dtend = `${y}${m}${d}T${eh}${em}00`;
+      } else {
+        // 종료시간 미정: 1시간 가정
+        const endH = String(Math.min(23, parseInt(sh, 10) + 1)).padStart(2, '0');
+        dtend = `${y}${m}${d}T${endH}${sm}00`;
+      }
+      lines.push("BEGIN:VEVENT");
+      lines.push(`UID:${e.id}@schedule-2026-h2`);
+      lines.push(`DTSTAMP:${dtstamp}`);
+      lines.push(`DTSTART;TZID=Asia/Seoul:${dtstart}`);
+      lines.push(`DTEND;TZID=Asia/Seoul:${dtend}`);
+    } else {
+      // 종일 일정
+      const nextDay = new Date(parseInt(y), parseInt(m) - 1, parseInt(d) + 1);
+      const ny = nextDay.getFullYear();
+      const nm = pad(nextDay.getMonth() + 1);
+      const nd = pad(nextDay.getDate());
+      lines.push("BEGIN:VEVENT");
+      lines.push(`UID:${e.id}@schedule-2026-h2`);
+      lines.push(`DTSTAMP:${dtstamp}`);
+      lines.push(`DTSTART;VALUE=DATE:${y}${m}${d}`);
+      lines.push(`DTEND;VALUE=DATE:${ny}${nm}${nd}`);
+    }
+    lines.push(fold(`SUMMARY:${escapeICS(e.title)}`));
+    if (e.location) lines.push(fold(`LOCATION:${escapeICS(e.location)}`));
+    const descParts = [];
+    if (e.type) descParts.push(`유형: ${TYPE_LABEL[e.type] || e.type}`);
+    if (e.owner) descParts.push(`담당자: ${e.owner}`);
+    if (e.importance) descParts.push(`중요도: ${IMPORTANCE_LABEL[e.importance] || e.importance}`);
+    if (e.memo) descParts.push(`메모: ${e.memo}`);
+    if (descParts.length) lines.push(fold(`DESCRIPTION:${escapeICS(descParts.join('\n'))}`));
+    if (e.importance === 'high') lines.push("PRIORITY:1");
+    lines.push("END:VEVENT");
+  });
+
+  lines.push("END:VCALENDAR");
+  const ics = lines.join("\r\n");
+  downloadFile(ics, `schedule_${todayYMD()}.ics`, 'text/calendar;charset=utf-8');
+  showToast(".ics 파일을 내보냈습니다");
+}
+
+/* ============================================================
+   10. 공유 링크
+   ============================================================ */
+// UTF-8 안전 base64 (한글 처리)
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(b64) {
+  return decodeURIComponent(escape(atob(b64)));
+}
+
+function openShareModal() {
+  const modal = document.getElementById('shareModal');
+  const linkEl = document.getElementById('shareLink');
+  const warnEl = document.getElementById('shareWarn');
+
+  const payload = JSON.stringify({ v: 1, events: state.events });
+  const encoded = utf8ToBase64(payload);
+  const baseUrl = location.href.split('#')[0];
+  const link = `${baseUrl}#data=${encoded}`;
+
+  linkEl.value = link;
+
+  // URL 너무 길면 안내
+  if (link.length > 8000) {
+    warnEl.innerHTML = `⚠ 공유 링크가 매우 깁니다 (${link.length}자). 일부 메신저/브라우저에서 잘릴 수 있습니다.<br>일정 수가 많다면 <b>JSON 내보내기</b>로 파일을 직접 전달하는 방식을 권장합니다.`;
+    warnEl.style.color = 'var(--sun)';
+  } else {
+    warnEl.innerHTML = `링크 길이: ${link.length}자 · 받는 사람이 이 링크를 열면 동일한 일정이 자동으로 불러와집니다.`;
+    warnEl.style.color = 'var(--text-muted)';
+  }
+  modal.classList.add('active');
+}
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('active');
+}
+function copyShareLink() {
+  const linkEl = document.getElementById('shareLink');
+  linkEl.select();
+  linkEl.setSelectionRange(0, 999999);
+  try {
+    // 최신 브라우저: Clipboard API
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(linkEl.value)
+        .then(() => showToast("공유 링크가 복사되었습니다"))
+        .catch(() => { document.execCommand('copy'); showToast("공유 링크가 복사되었습니다"); });
+    } else {
+      document.execCommand('copy');
+      showToast("공유 링크가 복사되었습니다");
+    }
+  } catch (e) {
+    showToast("복사 실패: 직접 선택해서 복사하세요");
+  }
+}
+
+// URL 해시로 들어온 공유 데이터 처리
+function checkSharedData() {
+  const hash = location.hash;
+  if (!hash.startsWith('#data=')) return;
+  try {
+    const encoded = hash.slice(6);
+    const json = base64ToUtf8(encoded);
+    const data = JSON.parse(json);
+    if (!data.events || !Array.isArray(data.events)) return;
+
+    const msg = `공유 링크에 ${data.events.length}건의 일정이 포함되어 있습니다.\n\n` +
+                `[확인] 현재 일정에 병합 (같은 ID는 덮어쓰기)\n` +
+                `[취소] 무시하고 현재 일정 유지`;
+    if (confirm(msg)) {
+      const map = new Map(state.events.map(e => [e.id, e]));
+      data.events.forEach(e => map.set(e.id || uid(), e));
+      state.events = Array.from(map.values());
+      saveToStorage();
+      showToast(`${data.events.length}건의 공유 일정을 불러왔습니다`);
+    }
+    // 해시 제거 (브라우저 히스토리에 남지 않도록)
+    history.replaceState(null, '', location.pathname + location.search);
+  } catch (e) {
+    console.error("공유 데이터 파싱 실패", e);
+    showToast("공유 링크가 손상되었거나 올바르지 않습니다");
+  }
+}
+
+/* ============================================================
+   11. 초기화
+   ============================================================ */
+function init() {
+  loadFromStorage();
+  checkSharedData(); // URL의 공유 데이터 확인
+
+  // 오늘이 6~12월이면 해당 월로, 아니면 6월
+  const today = new Date();
+  if (today.getFullYear() === 2026 && today.getMonth() + 1 >= 6 && today.getMonth() + 1 <= 12) {
+    const idx = MONTHS.findIndex(mo => mo.m === today.getMonth() + 1);
+    if (idx >= 0) state.currentIndex = idx;
+    state.selectedDate = todayYMD();
+  } else {
+    state.selectedDate = "2026-06-01";
+  }
+
+  // 오늘 날짜 표시
+  const t = new Date();
+  const dowName = ['일','월','화','수','목','금','토'][t.getDay()];
+  document.getElementById('todayLabel').textContent =
+    `오늘: ${t.getFullYear()}.${pad(t.getMonth()+1)}.${pad(t.getDate())} (${dowName})`;
+
+  buildMonthNav();
+  renderCalendar();
+
+  // 모달 배경 클릭으로 닫기
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) m.classList.remove('active');
+    });
+  });
+
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active'));
+    }
+  });
+}
+
+// DOM 준비되면 초기화
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+
+</body></html>
